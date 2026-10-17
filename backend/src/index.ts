@@ -12,8 +12,45 @@ import type { ChatMessage, ToolDef } from "./llm/types.js";
 //     { name: "hackernews", command: "npx", args: ["tsx", process.env.MCP_NEWS_PATH ?? "../mcp-hackernews/src/index.ts"] },
 //     { name: "github", command: "npx", args: ["tsx", process.env.MCP_GITHUB_PATH ?? "../mcp-github/src/index.ts"] },
 // ];
-const MCP_SERVERS:any = [
-    {name: "ryhti", command: "npx", args: ["tsx", process.env.MCP_RYHTI_PATH ?? "../mcp-ryhti/src/index.ts"]},
+interface McpServerConfig {
+    name: string;
+    command: string;
+    args: string[];
+    envKeys: string[];
+}
+
+const MCP_SERVERS: McpServerConfig[] = [
+    {
+        name: "ryhti",
+        command: "npx",
+        args: ["tsx", process.env.MCP_RYHTI_PATH ?? "../mcp-ryhti/src/index.ts"],
+        envKeys: ["TIMEZONE", "SYKE_USER_ID"],
+    },
+    {
+        name: "mml",
+        command: "npx",
+        args: ["tsx", process.env.MCP_MML_PATH ?? "../mcp-mml/src/index.ts"],
+        envKeys: [
+            "TIMEZONE",
+            "MML_API_KEY",
+            "MML_BASE_URL",
+            "MML_GEOCODING_BASE_URL",
+        ],
+    },
+    {
+        name: "helsinki-decisions",
+        command: "npx",
+        args: [
+            "tsx",
+            process.env.MCP_HELSINKI_DECISIONS_PATH ??
+                "../mcp-helsinki-decisions/src/index.ts",
+        ],
+        envKeys: [
+            "TIMEZONE",
+            "HELSINKI_DECISIONS_API_URL",
+            "PARCEL_DATA_PATH",
+        ],
+    },
 ];
 
 const llm = createProvider();
@@ -21,7 +58,7 @@ const hub = new McpHub();
 const tools: ToolDef[] = [];
 
 for (const s of MCP_SERVERS) {
-    const t = await hub.connect(s.command, s.args);
+    const t = await hub.connect(s.command, s.args, s.envKeys);
     console.log(`✅ ${s.name}:`, t.map((x) => x.name));
     tools.push(...t);
 }

@@ -1,7 +1,8 @@
 import type { ChatMessage, LLMProvider, ToolDef } from "./llm/types.js";
 import type { McpHub } from "./mcp-client.js";
 import { buildSystemPrompt } from "./system-prompt.js";
-const MAX_STEPS = 100;
+
+const MAX_TOOL_STEPS = 5;
 
 export async function runAgent(
     llm: LLMProvider,
@@ -9,7 +10,7 @@ export async function runAgent(
     tools: ToolDef[],
     history: ChatMessage[]
 ): Promise<string> {
-    for (let step = 0; step < MAX_STEPS; step++) {
+    for (let step = 0; step < MAX_TOOL_STEPS; step++) {
         const res = await llm.chat(
             [{ role: "system", content: buildSystemPrompt() }, ...history],
             tools
@@ -29,5 +30,22 @@ export async function runAgent(
             history.push({ role: "tool", toolCallId: call.id, name: call.name, content: output });
         }
     }
-    return "Reach the limit steps.";
+
+    // Give the model one tool-free turn to summarize the gathered results even
+    // when it used every available tool step.
+    const finalResponse = await llm.chat(
+        [
+            { role: "system", content: buildSystemPrompt() },
+            ...history,
+            {
+                role: "system",
+                content:
+                    "The tool-call limit has been reached. Answer now using the available tool results. Do not request another tool.",
+            },
+        ],
+        []
+    );
+
+    history.push({ role: "assistant", content: finalResponse.text });
+    return finalResponse.text || "Unable to produce a final answer from the available tool results.";
 }
