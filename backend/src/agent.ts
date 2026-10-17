@@ -1,7 +1,7 @@
 import type { ChatMessage, LLMProvider, ToolDef } from "./llm/types.js";
 import type { McpHub } from "./mcp-client.js";
 import { buildSystemPrompt } from "./system-prompt.js";
-const MAX_STEPS = 5;
+const MAX_STEPS = 100;
 
 export async function runAgent(
     llm: LLMProvider,
