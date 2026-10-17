@@ -9,7 +9,14 @@ export class OllamaProvider implements LLMProvider {
         host = process.env.OLLAMA_URL ?? "http://localhost:11434",
         private model = process.env.OLLAMA_MODEL ?? "gemma4:31b-cloud"
     ) {
-        this.client = new Ollama({ host });
+    this.client = new Ollama({
+    host,
+    headers: process.env.OLLAMA_API_KEY
+    ? {
+        Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`,
+      }
+    : undefined,
+    });
     }
 
     async chat(messages: ChatMessage[], tools: ToolDef[]): Promise<LLMResponse> {
