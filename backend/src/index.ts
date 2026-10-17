@@ -12,7 +12,9 @@ import type { ChatMessage, ToolDef } from "./llm/types.js";
 //     { name: "hackernews", command: "npx", args: ["tsx", process.env.MCP_NEWS_PATH ?? "../mcp-hackernews/src/index.ts"] },
 //     { name: "github", command: "npx", args: ["tsx", process.env.MCP_GITHUB_PATH ?? "../mcp-github/src/index.ts"] },
 // ];
-const MCP_SERVERS:any = [];
+const MCP_SERVERS:any = [
+    {name: "ryhti", command: "npx", args: ["tsx", process.env.MCP_RYHTI_PATH ?? "../mcp-ryhti/src/index.ts"]},
+];
 
 const llm = createProvider();
 const hub = new McpHub();
