@@ -24,10 +24,10 @@ type ServiceName = keyof typeof SERVICES;
 const COLLECTIONS: Record<string, ServiceName> = {
   open_building: "building",
   open_address: "building",
-//   open_permit_building: "permit",
-//   open_permit_address: "permit",
-//   "BU.Building": "inspireBuilding",
-//   "AD.Address": "inspireAddress",
+  open_permit_building: "permit",
+  open_permit_address: "permit",
+  "BU.Building": "inspireBuilding",
+  "AD.Address": "inspireAddress",
 };
 
 const MAX_LIMIT = 3000;
