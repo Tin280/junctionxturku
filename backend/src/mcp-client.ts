@@ -1,19 +1,37 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import {
+    getDefaultEnvironment,
+    StdioClientTransport,
+} from "@modelcontextprotocol/sdk/client/stdio.js";
 import type { ToolDef } from "./llm/types.js";
+
+function buildChildEnvironment(keys: string[]): Record<string, string> {
+    const env = getDefaultEnvironment();
+
+    for (const key of keys) {
+        const value = process.env[key];
+        if (value !== undefined) env[key] = value;
+    }
+
+    return env;
+}
 
 export class McpHub {
     private toolToClient = new Map<string, Client>();
     private clients: Client[] = [];
 
     /** Khởi động một MCP server và đăng ký các tool của nó */
-    async connect(command: string, args: string[]): Promise<ToolDef[]> {
+    async connect(
+        command: string,
+        args: string[],
+        envKeys: string[] = []
+    ): Promise<ToolDef[]> {
         const client = new Client({ name: "ai-assistant", version: "1.0.0" });
         await client.connect(
             new StdioClientTransport({
                 command,
                 args,
-                env: process.env.TIMEZONE ? { TIMEZONE: process.env.TIMEZONE } : {},
+                env: buildChildEnvironment(envKeys),
                 stderr: "inherit",
             }));
         this.clients.push(client);
