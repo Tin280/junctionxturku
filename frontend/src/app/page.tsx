@@ -65,6 +65,17 @@ export default function Home() {
       if (!res.ok) throw new Error(data.error ?? `Request failed (${res.status})`);
       setSessionId(data.sessionId);
       setMessages((m) => [...m, { role: "assistant", content: data.reply, tools: data.toolsUsed }]);
+
+      // ===================== ADDED FOR PASILA INTELLIGENCE (map focus) =====================
+      // When this UI is embedded as the Assistant panel in Pasila Intelligence (an iframe),
+      // send each reply to the parent page so its map can focus on the buildings/areas named.
+      // Pasila accepts the message only from this iframe's origin and matches the text against
+      // official data (VTJ-PRT, property ID, address, street, postal code).
+      // Opened on its own (not in an iframe), window.parent is this window and nothing listens.
+      // Protocol: { type: "assistant:reply", text: string }  (see README of the dev/fe branch)
+      // Delivered only to Pasila served locally at http://localhost:8000 (not 127.0.0.1); change for deployment.
+      window.parent?.postMessage({ type: "assistant:reply", text: data.reply }, "http://localhost:8000");
+      // =================== END ADDED FOR PASILA INTELLIGENCE (map focus) ===================
     } catch (e) {
       setMessages((m) => [
         ...m,
